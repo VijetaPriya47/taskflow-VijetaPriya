@@ -52,7 +52,7 @@ True to Clean Architecture, domain models are perfectly isolated. Outer layers d
   - **Observability**: This standardizes the log format, enabling automated log ingestion pipelines to easily parse metrics like request methodology, duration, remote IPs, and context-bound user data without complex parsing.
    
 - **Context Propagation**: Every incoming request extracts or generates a unique `X-Request-Id`. This ID, along with the authenticated user information, is injected directly into Go's `context.Context`. It is then propagated through to the service layers, echoed back in the HTTP response headers, and automatically attached to all structured `slog` entries to ensure comprehensive downstream observability.
-  -***Tradeoff***: Pollutes the Go context pipeline slightly from the edges inward, but massively pays off by ensuring a flawlessly linked observability tracing system for production debugging.
+- -***Tradeoff***: Pollutes the Go context pipeline slightly from the edges inward, but massively pays off by ensuring a flawlessly linked observability tracing system for production debugging.
   
 - **Foreign key Indexes**: Included essential lookup indexes to accelerate common queries:
   - `idx_tasks_project_id`: Rapidly accesses all tasks belonging to a single project.
