@@ -1,0 +1,14 @@
+meta {
+  name: GetProject
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/projects/{{projectId}}
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+

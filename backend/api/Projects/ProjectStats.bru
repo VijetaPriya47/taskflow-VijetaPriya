@@ -1,0 +1,14 @@
+meta {
+  name: ProjectStats
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/projects/{{projectId}}/stats
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+

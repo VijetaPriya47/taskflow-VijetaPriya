@@ -1,0 +1,4 @@
+# Local Go caches (often created when GOCACHE/GOMODCACHE/GOPATH point inside this dir)
+.gocache/
+.gomodcache/
+.gopath/

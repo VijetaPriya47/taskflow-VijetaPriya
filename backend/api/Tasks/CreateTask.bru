@@ -1,0 +1,25 @@
+meta {
+  name: CreateTask
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/projects/{{projectId}}/tasks
+  body: json
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "title": "Task via Bruno",
+    "description": "Created from Bruno collection",
+    "priority": "medium",
+    "assignee_id": null,
+    "due_date": "2026-04-15"
+  }
+}
+

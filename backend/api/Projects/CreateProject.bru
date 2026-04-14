@@ -1,0 +1,22 @@
+meta {
+  name: CreateProject
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/projects
+  body: json
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "name": "My Project",
+    "description": "Created via Bruno"
+  }
+}
+

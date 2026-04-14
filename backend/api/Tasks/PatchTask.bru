@@ -1,0 +1,22 @@
+meta {
+  name: PatchTask
+  type: http
+  seq: 11
+}
+
+patch {
+  url: {{baseUrl}}/tasks/{{taskId}}
+  body: json
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "status": "done",
+    "priority": "high"
+  }
+}
+

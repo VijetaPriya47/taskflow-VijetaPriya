@@ -1,0 +1,22 @@
+meta {
+  name: PatchProject
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/projects/{{projectId}}
+  body: json
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "name": "Renamed Project",
+    "description": "Updated via Bruno"
+  }
+}
+
