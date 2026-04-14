@@ -22,28 +22,44 @@ This is a standalone monolithic backend for the **TaskFlow** assignment, serving
 - `internal/storage/postgres`: Postgres repositories (Adapter).
 
 ***Why this structure?***
-True to Clean Architecture, domain models are perfectly isolated. Outer layers depend inward. Graceful shutdown (`cmd/taskflow/main.go`) and structured request logging (`requestLogMiddleware`) do not interfere with core task-management logic. 
+True to Clean Architecture, domain models are perfectly isolated. Outer layers depend inward. Graceful shutdown (`cmd/taskflow/main.go`) and structured request logging (`requestLogMiddleware`) do not interfere with core task-management logic.
+
 ***Design Tradeoff (Rule of Thumb)***: Code is split by concept only when it's substantial (handlers vs middleware vs helpers). I don't split small 5-30 line helpers just because I can to prevent things from becoming too verbose. 
+
 ***Architectural Tradeoff***: Fully breaking apart Clean Architecture for a small MVP adds structural boilerplate initially, but it guarantees completely flat, decoupled scaling and zero technical debt.
 
 **Other specific decisions**:
-- **Dedicated Validator Service**: Robust input validation rules have been isolated into a custom framework-agnostic package strictly at `internal/validator`. HTTP handlers depend on this utility to evaluate payload constraints, keeping the router code slim while preserving identical, predictable 400 error payload shapes. ***Tradeoff***: Introduces another internal dependency to learn, but overwhelmingly benefits by keeping HTTP handlers razor-thin.
+- **Dedicated Validator Service**: Robust input validation rules have been isolated into a custom framework-agnostic package strictly at `internal/validator`. HTTP handlers depend on this utility to evaluate payload constraints, keeping the router code slim while preserving identical, predictable 400 error payload shapes.
+
+ - ***Tradeoff***: Introduces another internal dependency to learn, but overwhelmingly benefits by keeping HTTP handlers razor-thin.
+
 - **SQL Injection Prevention**: We prevent SQL injection by strictly using **parameterized queries** through the `pgxpool` driver. This ensures that user inputs (like emails or titles) are treated as literal data by Postgres, never as executable code.
+  
 - **BOLA Prevention (Authorization)**: To prevent **Broken Object Level Authorization**, ownership checks are enforced at the service layer ([`internal/application/task_service.go`](file:///home/anya/VijetaPriya/backend/internal/application/task_service.go)). For example, a task can only be deleted if the requester is either the **Project Owner** or the **Task Creator**.
+
 - **Global Error Formatting & Typed Handlers**: Handlers return standardized error types to avoid boilerplate. Global helpers like `Validation()`, `RequireUser()`, etc. live in `internal/transport/http/respond.go`. They guarantee rigid responses (e.g., 400 Validation, 401 Unauthenticated).
- ***Tradeoff***: Requires manually mapping Database errors to Domain errors and finally to HTTP wrappers, but cleanly untethers business logic entirely from HTTP context/status codes.
+
+ - ***Tradeoff***: Requires manually mapping Database errors to Domain errors and finally to HTTP wrappers, but cleanly untethers business logic entirely from HTTP context/status codes.
+
 - **Auditability (Activity Logs)**: Implemented using the **Decorator Pattern**. An `ActivityService` decorator wraps core use-case services so the core stays purely focused on orchestration.
-  ***Tradeoff Acknowledgment***: Using the Decorator pattern here is an intentional architectural flex to prioritize domain purity, even though it adds a slight degree of structural complexity to the initial setup. This approach tightly guards Clean Architecture alignment and ensures logging completeness across entrypoints without violating Separation of Concerns.
-- **Structured Logging**: Leveraging Go's `log/slog`, application logs are emitted as structured JSON (standard in production). 
+
+  -***Tradeoff Acknowledgment***: Using the Decorator pattern here is an intentional architectural flex to prioritize domain purity, even though it adds a slight degree of structural complexity to the initial setup. This approach tightly guards Clean Architecture alignment and ensures logging completeness across entrypoints without violating Separation of Concerns.
+ 
+- **Structured Logging**: Leveraging Go's `log/slog`, application logs are emitted as structured JSON (standard in production).
+  
   - **Where are the logs?**: Logs are written to `os.Stdout` (standard output). When running via Docker, you can view them live using `docker compose logs -f taskflow`.
+
   - **Observability**: This standardizes the log format, enabling automated log ingestion pipelines to easily parse metrics like request methodology, duration, remote IPs, and context-bound user data without complex parsing.
+   
 - **Context Propagation**: Every incoming request extracts or generates a unique `X-Request-Id`. This ID, along with the authenticated user information, is injected directly into Go's `context.Context`. It is then propagated through to the service layers, echoed back in the HTTP response headers, and automatically attached to all structured `slog` entries to ensure comprehensive downstream observability.
-  ***Tradeoff***: Pollutes the Go context pipeline slightly from the edges inward, but massively pays off by ensuring a flawlessly linked observability tracing system for production debugging.
+  -***Tradeoff***: Pollutes the Go context pipeline slightly from the edges inward, but massively pays off by ensuring a flawlessly linked observability tracing system for production debugging.
+  
 - **Foreign key Indexes**: Included essential lookup indexes to accelerate common queries:
   - `idx_tasks_project_id`: Rapidly accesses all tasks belonging to a single project.
   - `idx_tasks_assignee_id`: Optimizes filtering and searching tasks assigned to a specific user.
   - `idx_tasks_status`: Accelerates filtering tasks by their status (e.g., matching all "done" tasks).
   - `idx_projects_owner_id`: Quickly retrieves the list of projects a particular user owns.
+ 
 - **Chi instead of Gin**: Used `go-chi` because it is perfectly compliant with standard `net/http`, lightweight, and sidesteps unnecessary performance tradeoffs where standard library simplicity handles the job effectively.
 
 ### Directory Structure & Responsibilities
