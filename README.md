@@ -21,6 +21,14 @@ This is a standalone monolithic backend for the **TaskFlow** assignment, serving
 - `internal/transport/http`: REST handlers, middleware, and errors mapping (Adapter).
 - `internal/storage/postgres`: Postgres repositories (Adapter).
 
+Architecture Mapping
+domain/
+ ├── Project (Entity)
+ ├── ProjectRepository (Port - outbound)
+ ├── ProjectService (Port - inbound)
+
+👉 This is Hexagonal Architecture (Ports & Adapters)
+
 ***Why this structure?***
 True to Clean Architecture, domain models are perfectly isolated. Outer layers depend inward. Graceful shutdown (`cmd/taskflow/main.go`) and structured request logging (`requestLogMiddleware`) do not interfere with core task-management logic.
 
