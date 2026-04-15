@@ -158,6 +158,8 @@ The Postman collection is located at `backend/api/postman_collection.json`.
 
 ## 7. What You'd Do With More Time
 - **Composite Indexes**: Add composite indexes on `project_id` + `assignee_id` to further optimize query performance for task assignments within projects.
+- **Exponential Backoff**: We retry DB connection with exponential backoff to handle transient startup issues like delayed DB readiness.
+- **Cicuit Breaker**: To prevent cascading failures when a dependency (like a DB, API, or service) is failing.
 - **Read-Heavy Lock Optimizations**: Employ optimistic lock strategies or fine-grained read-write locks when concurrently modifying identical heavily-read projects.
 - **Rate limiting**: Add protections (like token buckets) at authentication endpoints to prevent DOS attacks.
 - **Authorization Expansion**: Add a feature to essentially ban users from participating or viewing private projects.
